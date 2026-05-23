@@ -1,0 +1,206 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.sw-root{padding:1.5rem 1rem 2rem;font-family:var(--font-sans);max-width:520px;margin:0 auto}
+.sw-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.sw-top{padding:1.25rem 1.5rem 0}
+.sw-toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.sw-label{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.sw-dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-secondary);transition:background .3s}
+.sw-dot.on{background:#3B6D11}
+.sw-badge{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)}
+.sw-clock{text-align:center;padding:1rem 0 1.25rem}
+.sw-digits{font-size:68px;font-weight:300;letter-spacing:-.02em;color:var(--color-text-primary);font-family:var(--font-mono);line-height:1;display:flex;align-items:baseline;justify-content:center;gap:0}
+.sw-digits .cs{font-size:34px;color:var(--color-text-secondary)}
+.sw-curlap{font-size:12px;color:var(--color-text-tertiary);font-family:var(--font-mono);text-align:center;min-height:16px;margin-top:.25rem}
+.sw-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--color-border-tertiary);border-top:0.5px solid var(--color-border-tertiary);border-bottom:0.5px solid var(--color-border-tertiary)}
+.sw-stat{background:var(--color-background-primary);padding:.75rem .5rem;text-align:center}
+.sw-stat-val{font-size:15px;font-weight:500;color:var(--color-text-primary);font-family:var(--font-mono)}
+.sw-stat-key{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.sw-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:1rem 1.5rem}
+.sw-btn{padding:10px 0;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);transition:background .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--font-sans)}
+.sw-btn:hover{background:var(--color-background-secondary)}
+.sw-btn:active{transform:scale(.97)}
+.sw-btn:disabled{opacity:.3;cursor:not-allowed}
+.sw-btn.go{background:#0C447C;color:#B5D4F4;border-color:#185FA5}
+.sw-btn.go:hover{background:#185FA5}
+.sw-btn.go.pause{background:#633806;color:#FAC775;border-color:#854F0B}
+.sw-btn.go.pause:hover{background:#854F0B}
+.sw-laps-wrap{padding:0 1.5rem 1.25rem}
+.sw-laps-head{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-top:0.5px solid var(--color-border-tertiary);margin-bottom:.25rem}
+.sw-laps-ht{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.08em}
+.sw-laps-ct{font-size:11px;color:var(--color-text-tertiary)}
+.sw-laps-list{max-height:200px;overflow-y:auto}
+.sw-lap{display:grid;grid-template-columns:28px 1fr 1fr 48px;align-items:center;padding:7px 0;border-top:0.5px solid var(--color-border-tertiary);gap:8px}
+.sw-lap:first-child{border-top:none}
+.sw-lap-n{font-size:11px;color:var(--color-text-tertiary);font-family:var(--font-mono)}
+.sw-lap-split{font-size:13px;font-family:var(--font-mono);color:var(--color-text-primary)}
+.sw-lap-total{font-size:12px;font-family:var(--font-mono);color:var(--color-text-secondary);text-align:right}
+.sw-lap-tag{font-size:10px;padding:2px 6px;border-radius:var(--border-radius-md);text-align:center}
+.sw-lap.best .sw-lap-split{color:#27500A}
+.sw-lap.best .sw-lap-tag{background:#EAF3DE;color:#27500A}
+.sw-lap.worst .sw-lap-split{color:#791F1F}
+.sw-lap.worst .sw-lap-tag{background:#FCEBEB;color:#791F1F}
+.sw-empty{text-align:center;padding:1.5rem;font-size:13px;color:var(--color-text-tertiary)}
+.sw-dl{display:flex;justify-content:center;padding:.25rem 1.5rem 1.25rem}
+.sw-dl-btn{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 16px;cursor:pointer;font-family:var(--font-sans);transition:background .15s}
+.sw-dl-btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Stopwatch web app with start, pause, reset, lap tracking, and best/worst lap highlighting.</h2>
+
+<div class="sw-root">
+<div class="sw-card">
+  <div class="sw-top">
+    <div class="sw-toprow">
+      <span class="sw-label"><span class="sw-dot" id="dot"></span>Stopwatch</span>
+      <span class="sw-badge" id="stateBadge">Ready</span>
+    </div>
+    <div class="sw-clock">
+      <div class="sw-digits">
+        <span id="hh" style="display:none">00:</span><span id="mm">00</span>:<span id="ss">00</span><span class="cs">.<span id="cs">00</span></span>
+      </div>
+      <div class="sw-curlap" id="curLap"></div>
+    </div>
+  </div>
+
+  <div class="sw-stats">
+    <div class="sw-stat"><div class="sw-stat-val" id="statLaps">0</div><div class="sw-stat-key">Laps</div></div>
+    <div class="sw-stat"><div class="sw-stat-val" id="statBest">—</div><div class="sw-stat-key">Best lap</div></div>
+    <div class="sw-stat"><div class="sw-stat-val" id="statAvg">—</div><div class="sw-stat-key">Avg lap</div></div>
+  </div>
+
+  <div class="sw-btns">
+    <button class="sw-btn" id="btnLap" disabled onclick="doLap()"><i class="ti ti-flag" aria-hidden="true" style="font-size:15px"></i> Lap</button>
+    <button class="sw-btn go" id="btnStart" onclick="doToggle()"><i class="ti ti-player-play" id="ico" aria-hidden="true" style="font-size:15px"></i> <span id="startTxt">Start</span></button>
+    <button class="sw-btn" id="btnReset" onclick="doReset()"><i class="ti ti-refresh" aria-hidden="true" style="font-size:15px"></i> Reset</button>
+  </div>
+
+  <div class="sw-laps-wrap">
+    <div class="sw-laps-head">
+      <span class="sw-laps-ht">Lap history</span>
+      <span class="sw-laps-ct" id="lapCt"></span>
+    </div>
+    <div class="sw-laps-list" id="lapList"><div class="sw-empty">No laps yet — press Lap while running</div></div>
+  </div>
+
+  <div class="sw-dl">
+    <button class="sw-dl-btn" onclick="downloadHTML()"><i class="ti ti-download" aria-hidden="true" style="font-size:14px"></i> Download stopwatch.html</button>
+  </div>
+</div>
+</div>
+
+<script>
+let elapsed=0,lapBase=0,ts=null,running=false,raf=null;
+const laps=[];
+const p2=n=>String(Math.floor(n)).padStart(2,'0');
+function ms2parts(ms){return{h:Math.floor(ms/3600000),m:Math.floor(ms%3600000/60000),s:Math.floor(ms%60000/1000),c:Math.floor(ms%1000/10)}}
+function fmtShort(ms){const{h,m,s,c}=ms2parts(ms);return(h?p2(h)+':':'')+(h||m?p2(m)+':':'')+p2(s)+'.'+p2(c)}
+function renderClock(ms){const{h,m,s,c}=ms2parts(ms);const hh=document.getElementById('hh');hh.style.display=h?'inline':'none';hh.textContent=p2(h)+':';document.getElementById('mm').textContent=p2(m);document.getElementById('ss').textContent=p2(s);document.getElementById('cs').textContent=p2(c)}
+function tick(){const now=performance.now();const tot=elapsed+(now-ts);renderClock(tot);const lapEl=tot-lapBase;document.getElementById('curLap').textContent=laps.length?'Lap '+(laps.length+1)+': '+fmtShort(lapEl):'';raf=requestAnimationFrame(tick)}
+function doToggle(){if(!running){ts=performance.now();running=true;raf=requestAnimationFrame(tick);document.getElementById('dot').classList.add('on');document.getElementById('startTxt').textContent='Pause';document.getElementById('ico').className='ti ti-player-pause';document.getElementById('btnStart').classList.add('pause');document.getElementById('btnLap').disabled=false;document.getElementById('stateBadge').textContent='Running'}else{elapsed+=performance.now()-ts;cancelAnimationFrame(raf);running=false;document.getElementById('dot').classList.remove('on');document.getElementById('startTxt').textContent='Resume';document.getElementById('ico').className='ti ti-player-play';document.getElementById('btnStart').classList.remove('pause');document.getElementById('stateBadge').textContent='Paused'}}
+function doLap(){if(!running)return;const now=performance.now();const tot=elapsed+(now-ts);const split=tot-lapBase;lapBase=tot;laps.push({split,tot});renderLaps();updateStats()}
+function doReset(){cancelAnimationFrame(raf);running=false;elapsed=0;lapBase=0;ts=null;laps.length=0;renderClock(0);document.getElementById('curLap').textContent='';document.getElementById('dot').classList.remove('on');document.getElementById('startTxt').textContent='Start';document.getElementById('ico').className='ti ti-player-play';document.getElementById('btnStart').classList.remove('pause');document.getElementById('btnLap').disabled=true;document.getElementById('stateBadge').textContent='Ready';renderLaps();updateStats()}
+function updateStats(){const ct=laps.length;document.getElementById('statLaps').textContent=ct;if(!ct){document.getElementById('statBest').textContent='—';document.getElementById('statAvg').textContent='—';return}const splits=laps.map(l=>l.split);document.getElementById('statBest').textContent=fmtShort(Math.min(...splits));document.getElementById('statAvg').textContent=fmtShort(splits.reduce((a,b)=>a+b,0)/ct)}
+function renderLaps(){const list=document.getElementById('lapList');const ct=document.getElementById('lapCt');if(!laps.length){list.innerHTML='<div class="sw-empty">No laps yet — press Lap while running</div>';ct.textContent='';return}ct.textContent=laps.length+' lap'+(laps.length>1?'s':'');const splits=laps.map(l=>l.split);const mn=Math.min(...splits),mx=Math.max(...splits);const multi=laps.length>1;let h='';for(let i=laps.length-1;i>=0;i--){const l=laps[i];const cls=multi&&l.split===mn?'best':multi&&l.split===mx?'worst':'';const tag=cls==='best'?'Best':cls==='worst'?'Slow':'';h+=`<div class="sw-lap ${cls}"><span class="sw-lap-n">${p2(i+1)}</span><span class="sw-lap-split">${fmtShort(l.split)}</span><span class="sw-lap-total">${fmtShort(l.tot)}</span><span class="sw-lap-tag">${tag}</span></div>`}list.innerHTML=h}
+function downloadHTML(){
+const code=`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stopwatch</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f4;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.card{background:#fff;border-radius:16px;border:1px solid #e5e5e4;max-width:480px;width:100%;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.top{padding:1.25rem 1.5rem 0}
+.toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.lbl{font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#ccc;transition:background .3s}
+.dot.on{background:#3B6D11}
+.badge{font-size:11px;padding:3px 10px;border-radius:8px;background:#f5f5f4;color:#888;border:1px solid #e5e5e4}
+.clock{text-align:center;padding:1rem 0 1.25rem}
+.digits{font-size:64px;font-weight:300;letter-spacing:-.02em;color:#111;font-family:ui-monospace,monospace;line-height:1;display:flex;align-items:baseline;justify-content:center}
+.cs{font-size:32px;color:#aaa}
+.curlap{font-size:12px;color:#bbb;font-family:ui-monospace,monospace;text-align:center;min-height:16px;margin-top:.25rem}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#e5e5e4;border-top:1px solid #e5e5e4;border-bottom:1px solid #e5e5e4}
+.stat{background:#fff;padding:.75rem .5rem;text-align:center}
+.sv{font-size:14px;font-weight:500;color:#111;font-family:ui-monospace,monospace}
+.sk{font-size:11px;color:#bbb;margin-top:2px}
+.btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:1rem 1.5rem}
+button{padding:10px 0;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #d4d4d3;background:transparent;color:#111;transition:background .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;width:100%}
+button:hover{background:#f5f5f4}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.3;cursor:not-allowed}
+.go{background:#0C447C;color:#B5D4F4;border-color:#185FA5}
+.go:hover{background:#185FA5!important}
+.go.pause{background:#633806;color:#FAC775;border-color:#854F0B}
+.go.pause:hover{background:#854F0B!important}
+.laps-wrap{padding:0 1.5rem 1.25rem}
+.laps-head{display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-top:1px solid #e5e5e4;margin-bottom:.25rem}
+.lht{font-size:11px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:.08em}
+.lct{font-size:11px;color:#bbb}
+.laps-list{max-height:220px;overflow-y:auto}
+.lap{display:grid;grid-template-columns:28px 1fr 1fr 48px;align-items:center;padding:7px 0;border-top:1px solid #f0f0ef;gap:8px}
+.lap:first-child{border-top:none}
+.ln{font-size:11px;color:#bbb;font-family:ui-monospace,monospace}
+.ls{font-size:13px;font-family:ui-monospace,monospace;color:#111}
+.lt{font-size:12px;font-family:ui-monospace,monospace;color:#888;text-align:right}
+.ltag{font-size:10px;padding:2px 6px;border-radius:6px;text-align:center}
+.lap.best .ls{color:#27500A}
+.lap.best .ltag{background:#EAF3DE;color:#27500A}
+.lap.worst .ls{color:#791F1F}
+.lap.worst .ltag{background:#FCEBEB;color:#791F1F}
+.empty{text-align:center;padding:1.5rem;font-size:13px;color:#bbb}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <div class="toprow">
+      <span class="lbl"><span class="dot" id="dot"></span>Stopwatch</span>
+      <span class="badge" id="badge">Ready</span>
+    </div>
+    <div class="clock">
+      <div class="digits">
+        <span id="hh" style="display:none">00:</span><span id="mm">00</span>:<span id="ss">00</span><span class="cs">.<span id="cs">00</span></span>
+      </div>
+      <div class="curlap" id="curLap"></div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="sv" id="sLaps">0</div><div class="sk">Laps</div></div>
+    <div class="stat"><div class="sv" id="sBest">—</div><div class="sk">Best lap</div></div>
+    <div class="stat"><div class="sv" id="sAvg">—</div><div class="sk">Avg lap</div></div>
+  </div>
+  <div class="btns">
+    <button id="bLap" disabled onclick="doLap()">&#9873; Lap</button>
+    <button class="go" id="bStart" onclick="doToggle()">&#9654; <span id="sTxt">Start</span></button>
+    <button id="bReset" onclick="doReset()">&#8635; Reset</button>
+  </div>
+  <div class="laps-wrap">
+    <div class="laps-head"><span class="lht">Lap history</span><span class="lct" id="lCt"></span></div>
+    <div class="laps-list" id="lList"><div class="empty">No laps yet — press Lap while running</div></div>
+  </div>
+</div>
+<script>
+let el=0,lb=0,ts=null,run=false,raf=null;const laps=[];
+const p2=n=>String(Math.floor(n)).padStart(2,'0');
+function parts(ms){return{h:Math.floor(ms/3600000),m:Math.floor(ms%3600000/60000),s:Math.floor(ms%60000/1000),c:Math.floor(ms%1000/10)}}
+function fs(ms){const{h,m,s,c}=parts(ms);return(h?p2(h)+':':'')+(h||m?p2(m)+':':'')+p2(s)+'.'+p2(c)}
+function rc(ms){const{h,m,s,c}=parts(ms);const hh=document.getElementById('hh');hh.style.display=h?'inline':'none';hh.textContent=p2(h)+':';document.getElementById('mm').textContent=p2(m);document.getElementById('ss').textContent=p2(s);document.getElementById('cs').textContent=p2(c)}
+function tick(){const now=performance.now();const tot=el+(now-ts);rc(tot);const le=tot-lb;document.getElementById('curLap').textContent=laps.length?'Lap '+(laps.length+1)+': '+fs(le):'';raf=requestAnimationFrame(tick)}
+function doToggle(){if(!run){ts=performance.now();run=true;raf=requestAnimationFrame(tick);document.getElementById('dot').classList.add('on');document.getElementById('sTxt').textContent='Pause';document.getElementById('bStart').innerHTML='&#9646;&#9646; <span id=\\'sTxt\\'>Pause</span>';document.getElementById('bStart').classList.add('pause');document.getElementById('bLap').disabled=false;document.getElementById('badge').textContent='Running'}else{el+=performance.now()-ts;cancelAnimationFrame(raf);run=false;document.getElementById('dot').classList.remove('on');document.getElementById('bStart').innerHTML='&#9654; <span id=\\'sTxt\\'>Resume</span>';document.getElementById('bStart').classList.remove('pause');document.getElementById('badge').textContent='Paused'}}
+function doLap(){if(!run)return;const now=performance.now();const tot=el+(now-ts);const split=tot-lb;lb=tot;laps.push({split,tot});renderLaps();updateStats()}
+function doReset(){cancelAnimationFrame(raf);run=false;el=0;lb=0;ts=null;laps.length=0;rc(0);document.getElementById('curLap').textContent='';document.getElementById('dot').classList.remove('on');document.getElementById('bStart').innerHTML='&#9654; <span id=\\'sTxt\\'>Start</span>';document.getElementById('bStart').classList.remove('pause');document.getElementById('bLap').disabled=true;document.getElementById('badge').textContent='Ready';renderLaps();updateStats()}
+function updateStats(){const ct=laps.length;document.getElementById('sLaps').textContent=ct;if(!ct){document.getElementById('sBest').textContent='—';document.getElementById('sAvg').textContent='—';return}const sp=laps.map(l=>l.split);document.getElementById('sBest').textContent=fs(Math.min(...sp));document.getElementById('sAvg').textContent=fs(sp.reduce((a,b)=>a+b,0)/ct)}
+function renderLaps(){const list=document.getElementById('lList');const ct=document.getElementById('lCt');if(!laps.length){list.innerHTML='<div class="empty">No laps yet</div>';ct.textContent='';return}ct.textContent=laps.length+' lap'+(laps.length>1?'s':'');const sp=laps.map(l=>l.split);const mn=Math.min(...sp),mx=Math.max(...sp);const multi=laps.length>1;let h='';for(let i=laps.length-1;i>=0;i--){const l=laps[i];const cls=multi&&l.split===mn?'best':multi&&l.split===mx?'worst':'';const tag=cls==='best'?'Best':cls==='worst'?'Slow':'';h+='<div class="lap '+cls+'"><span class="ln">'+p2(i+1)+'<\\/span><span class="ls">'+fs(l.split)+'<\\/span><span class="lt">'+fs(l.tot)+'<\\/span><span class="ltag">'+tag+'<\\/span><\\/div>'}list.innerHTML=h}
+<\/script>
+</body>
+</html>`;
+  const blob=new Blob([code],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='stopwatch.html';a.click();
+}
+renderLaps();
+</script>
